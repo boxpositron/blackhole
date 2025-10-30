@@ -1,0 +1,117 @@
+version: "3.8"
+
+services:
+  tailscale:
+    image: tailscale/tailscale:v1.56.1
+    container_name: tailscale-pihole
+    hostname: pihole
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}?ephemeral=true&preauthorized=true
+      - TS_EXTRA_ARGS=--accept-dns=false --advertise-tags=tag:dns --ssh
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+    volumes:
+      - ./tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+          pids: 100
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 100
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  pihole:
+    image: pihole/pihole:2024.07.0
+    container_name: pihole
+    hostname: pihole
+    environment:
+      # Timezone
+      TZ: ${TZ:-America/New_York}
+      
+      # Web Interface Password
+      WEBPASSWORD: ${PIHOLE_PASSWORD}
+      
+      # DNS Settings - Optimized for Tailscale
+      FTLCONF_dns_listeningMode: all
+      FTLCONF_dns_upstreams: ${DNS_UPSTREAMS:-9.9.9.9;149.112.112.112}
+      
+      # Performance Tuning
+      FTLCONF_dns_cache_size: ${CACHE_SIZE:-25000}
+      FTLCONF_dns_maxCacheTime: ${MAX_CACHE_TIME:-3600}
+      FTLCONF_dns_cacheOptimistic: ${CACHE_OPTIMISTIC:-true}
+      
+      # Query Performance (SECURITY: Reduced from 1000/60)
+      FTLCONF_dns_rateLimit: ${RATE_LIMIT:-100/60}
+      FTLCONF_dns_maxConcurrentQueries: ${MAX_CONCURRENT:-50}
+      
+      # Privacy Settings (SECURITY: Reduced from 365 days)
+      FTLCONF_dns_queryLogging: ${QUERY_LOGGING:-true}
+      FTLCONF_database_maxDBdays: ${DB_RETENTION_DAYS:-7}
+      FTLCONF_database_DBinterval: ${DB_INTERVAL:-1.0}
+      
+      # IPv6 Support
+      FTLCONF_dns_ipv6: ${ENABLE_IPV6:-true}
+      
+      # Interface Settings - Critical for Tailscale
+      DNSMASQ_LISTENING: all
+      
+      # Virtual Host for Web Interface
+      VIRTUAL_HOST: ${VIRTUAL_HOST:-pihole.local}
+      
+    volumes:
+      - ./etc-pihole:/etc/pihole
+      - ./etc-dnsmasq.d:/etc-dnsmasq.d
+    
+    # Share network with Tailscale container
+    # This makes Pi-hole accessible via Tailscale network
+    network_mode: service:tailscale
+    
+    depends_on:
+      tailscale:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD-SHELL", "dig +short +time=1 @127.0.0.1 pi.hole || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    
+    # Resource Limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 512M
+          pids: 200
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 200
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  default:
+    driver: bridge

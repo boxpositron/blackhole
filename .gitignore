@@ -1,0 +1,32 @@
+# Environment files with secrets
+.env
+
+# Pi-hole data directories
+etc-pihole/
+etc-dnsmasq.d/*.conf.bak
+
+# Tailscale state
+tailscale-state/
+
+# Backups
+*.tar.gz
+*.zip
+backup/
+
+# Logs
+*.log
+
+# Documentation (except README.md)
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
