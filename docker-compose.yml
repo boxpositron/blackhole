@@ -40,7 +40,6 @@ services:
   pihole:
     image: pihole/pihole:2024.07.0
     container_name: pihole
-    hostname: pihole
     environment:
       # Timezone
       TZ: ${TZ:-America/New_York}
