@@ -1,8 +1,8 @@
 services:
   tailscale:
     image: tailscale/tailscale:latest
-    container_name: tailscale-pihole
-    hostname: pihole
+    container_name: tailscale-pihole-dev
+    hostname: pihole-dev
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_EXTRA_ARGS=--accept-dns=false --ssh
@@ -37,7 +37,7 @@ services:
 
   pihole:
     image: pihole/pihole:2024.07.0
-    container_name: pihole
+    container_name: pihole-dev
     environment:
       # Timezone
       TZ: ${TZ:-America/New_York}
