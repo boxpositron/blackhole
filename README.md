@@ -508,7 +508,7 @@ docker-compose restart tailscale
    ```bash
    # Linux/Mac
    sudo tailscale down && sudo tailscale up
-   
+
    # Windows: Restart Tailscale service
    ```
 
