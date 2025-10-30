@@ -644,8 +644,6 @@ This infrastructure implements multiple security layers to protect your DNS and 
    docker exec pihole pihole -t
    ```
 
-For complete security documentation, see [SECURITY.md](SECURITY.md)
-
 ## Development
 
 ### Pre-Commit Hooks
@@ -679,14 +677,6 @@ Pre-commit runs automatically when you `git commit`. If checks fail, fix the iss
 ```bash
 git commit --no-verify -m "Emergency fix"
 ```
-
-**For detailed information, see [PRECOMMIT.md](PRECOMMIT.md)**
-
-## Additional Documentation
-
-- **[Security Policy](SECURITY.md)** - Security measures, best practices, and incident response
-- **[Detailed Coolify Deployment Guide](COOLIFY.md)** - Comprehensive Coolify-specific documentation with troubleshooting
-- **[Pre-Commit Hooks Guide](PRECOMMIT.md)** - Development workflow and code quality checks
 
 ## Support
 
